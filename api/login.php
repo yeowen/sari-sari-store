@@ -14,7 +14,7 @@ if ($method === 'POST') {
 
     $email = strtolower(trim($conn->real_escape_string($data['email'] ?? '')));
     $password = $data['password'] ?? '';
-    $role = strtolower(trim($conn->real_escape_string($data['role'] ?? 'customer')));
+    $selectedRole = strtolower(trim($conn->real_escape_string($data['role'] ?? '')));
 
     // Siguraduhing laging existing ang default credentials
     $demoAccounts = [
@@ -32,7 +32,8 @@ if ($method === 'POST') {
         }
     }
 
-    $sql = "SELECT * FROM users WHERE LOWER(email) = '$email' AND LOWER(role) = '$role'";
+    // Hanapin ang user ayon sa email
+    $sql = "SELECT * FROM users WHERE LOWER(email) = '$email'";
     $result = $conn->query($sql);
 
     if ($result && $result->num_rows > 0) {
@@ -50,7 +51,7 @@ if ($method === 'POST') {
             jsonResponse(["success" => false, "message" => "Invalid password"]);
         }
     } else {
-        jsonResponse(["success" => false, "message" => "Account not found or role mismatch"]);
+        jsonResponse(["success" => false, "message" => "Account not found"]);
     }
 } else {
     jsonResponse(["success" => false, "message" => "Method not allowed"]);

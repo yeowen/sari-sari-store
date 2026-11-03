@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -88,6 +88,16 @@
     const loginBtnText = document.getElementById("loginBtnText");
     const loginSpinner = document.getElementById("loginSpinner");
 
+    // Auto-sync role dropdown base sa tina-type na email
+    emailInput.addEventListener("input", function() {
+        const val = emailInput.value.trim().toLowerCase();
+        if (val.startsWith("admin")) {
+            roleSelect.value = "admin";
+        } else if (val.startsWith("staff")) {
+            roleSelect.value = "staff";
+        }
+    });
+
     function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
@@ -135,7 +145,7 @@
 
         const role = roleSelect.value;
 
-        // Loading state
+        // Loading state sa button
         loginBtn.disabled = true;
         loginBtnText.textContent = "Logging in...";
         loginSpinner.classList.remove("d-none");
@@ -150,17 +160,24 @@
 
             if (data.success) {
                 localStorage.setItem("loggedInUser", JSON.stringify(data.user));
-                showToast("Login successful! Welcome, " + data.user.name + "!", "success");`r`n                if (typeof showPageLoader === "function") { showPageLoader("Entering dashboard..."); }
+                showToast("Login successful! Welcome, " + data.user.name + "!", "success");
+
+                // Kukunin ang tunay na role ng user mula sa server
+                const userRole = (data.user.role || role || "").toLowerCase();
+
+                if (typeof showPageLoader === "function") {
+                    showPageLoader(userRole === "customer" ? "Entering store..." : "Opening " + userRole + " dashboard...");
+                }
                 
                 setTimeout(function() {
-                    if (role === "admin") {
+                    if (userRole === "admin") {
                         window.location.href = "admin-dashboard.html";
-                    } else if (role === "staff") {
+                    } else if (userRole === "staff") {
                         window.location.href = "staff-dashboard.html";
                     } else {
                         window.location.href = "index.html";
                     }
-                }, 800);
+                }, 750);
             } else {
                 showToast(data.message, "danger");
                 loginBtn.disabled = false;
