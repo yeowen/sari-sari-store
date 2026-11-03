@@ -1,4 +1,4 @@
-// =========================
+﻿// =========================
 // SARI-SARI STORE — CUSTOMER / GLOBAL SCRIPT
 // Depende sa shared.js (dapat mauna itong i-load)
 // =========================

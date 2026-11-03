@@ -1,19 +1,45 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Sari-Sari Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg bg-white shadow-sm">
+<!-- 4-SECOND SPLASH SCREEN -->
+<div id="indexSplashLoader" class="index-splash-screen" role="dialog" aria-modal="true" aria-label="Loading Sari-Sari Store">
+    <div class="splash-content">
+        <div class="splash-icon-wrapper">
+            <div class="splash-radar-ring"></div>
+            <div class="splash-radar-ring ring-2"></div>
+            <div class="splash-badge">
+                <span class="splash-cart-emoji">🛒</span>
+            </div>
+        </div>
+
+        <h1 class="splash-title">Sari-Sari Store</h1>
+        <p class="splash-subtitle" id="splashStatusText">Connecting to store inventory...</p>
+
+        <div class="splash-progress-wrapper">
+            <div class="splash-progress-track">
+                <div class="splash-progress-bar" id="splashProgressBar"></div>
+            </div>
+            <div class="splash-meta">
+                <span>Loading everyday essentials</span>
+                <span class="splash-percentage" id="splashPercent">0%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand text-success" href="index.html">🛒 Sari-Sari Store</a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -69,6 +95,56 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/shared.js"></script>
 <script src="js/script.js"></script>
+
+<script>
+    // 4-Second Splash Animation Controller
+    (function() {
+        const splash = document.getElementById("indexSplashLoader");
+        if (!splash) return;
+
+        const bar = document.getElementById("splashProgressBar");
+        const percentEl = document.getElementById("splashPercent");
+        const statusText = document.getElementById("splashStatusText");
+
+        const totalDuration = 4000; // 4 seconds
+        const startTime = performance.now();
+
+        const messages = [
+            { time: 0, text: "Connecting to store inventory..." },
+            { time: 1300, text: "Loading everyday essentials & fresh deals..." },
+            { time: 2700, text: "Almost ready! Welcome to Sari-Sari Store..." }
+        ];
+
+        function step() {
+            const elapsed = performance.now() - startTime;
+            const progress = Math.min(1, elapsed / totalDuration);
+            const percent = Math.floor(progress * 100);
+
+            if (bar) bar.style.width = percent + "%";
+            if (percentEl) percentEl.textContent = percent + "%";
+
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (elapsed >= messages[i].time && statusText) {
+                    statusText.textContent = messages[i].text;
+                    break;
+                }
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                setTimeout(function() {
+                    splash.classList.add("splash-hidden");
+                    setTimeout(function() {
+                        if (splash.parentNode) splash.parentNode.removeChild(splash);
+                    }, 700);
+                }, 150);
+            }
+        }
+
+        requestAnimationFrame(step);
+    })();
+</script>
 
 </body>
 </html>
