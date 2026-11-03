@@ -57,3 +57,17 @@ CREATE TABLE IF NOT EXISTS order_items (
   CONSTRAINT order_items_order_fk FOREIGN KEY (order_id)
     REFERENCES orders (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Default Demo Accounts (password: 123456)
+INSERT IGNORE INTO users (name, email, password, role, contact, address) VALUES
+('Demo Admin', 'admin@demo.com', '123456', 'admin', '09334455667', 'Main Office'),
+('Demo Staff', 'staff@demo.com', '123456', 'staff', '09223344556', 'Store Counter'),
+('Demo Customer', 'customer@demo.com', '123456', 'customer', '09123456789', 'Brgy. Sample, Metro Manila');
+
+-- Default Starter Products
+INSERT IGNORE INTO products (name, category, price, stock, image) VALUES
+('Coca-Cola 1.5L', 'beverages', 75.00, 20, ''),
+('Lucky Me Pancit Canton', 'snacks', 18.00, 35, ''),
+('Safeguard Soap', 'personal', 25.00, 15, ''),
+('Bear Brand Milk', 'beverages', 15.00, 25, '');

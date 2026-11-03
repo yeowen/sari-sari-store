@@ -103,31 +103,52 @@ body {
 
 
 /* =========================
-   LOGIN & REGISTER
+   LOGIN & REGISTER (RESPONSIVE)
 ========================= */
 
 .login-container,
 .register-container {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
-    padding: 20px;
+    background: linear-gradient(135deg, #198754 0%, #0f5132 100%);
+    padding: clamp(14px, 3.5vw, 32px);
 }
 
 .login-card,
 .register-card {
     width: 100%;
     border: none;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2) !important;
+    background: #ffffff;
+    overflow: hidden;
 }
 
 .login-card {
-    max-width: 400px;
+    max-width: 420px;
 }
 
 .register-card {
-    max-width: 450px;
+    max-width: 500px;
+}
+
+.login-card .card-body,
+.register-card .card-body {
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+@media (max-width: 480px) {
+    .login-container,
+    .register-container {
+        padding: 12px 8px;
+    }
+    .login-card,
+    .register-card {
+        border-radius: 12px;
+    }
 }
 
 
@@ -206,10 +227,9 @@ footer {
 }
 
 /* =========================
-   DROPDOWNS & INPUTS (SAKTONG LAKI)
+   DROPDOWNS & INPUTS (RESPONSIVE)
 ========================= */
 
-/* Ibinalik sa 1.15rem para kapareho lang ng normal text pero madaling basahin */
 select, 
 select.form-select, 
 select.form-control, 
@@ -222,16 +242,32 @@ input[type="text"],
 input[type="number"],
 input[type="email"],
 input[type="password"] {
-    font-size: 1.15rem !important; 
-    padding: 0.6rem 1rem !important; 
+    font-size: 1.05rem !important; 
+    padding: 0.6rem 0.95rem !important; 
     height: auto !important; 
-    border-radius: 0.4rem !important;
-    /* Wala nang fixed width, awtomatikong lalapad */
+    border-radius: 0.5rem !important;
+}
+
+@media (max-width: 576px) {
+    select, 
+    select.form-select, 
+    select.form-control, 
+    .form-select, 
+    .status-select,
+    input.form-control,
+    input[type="date"],
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"] {
+        font-size: 1rem !important; 
+        padding: 0.55rem 0.85rem !important; 
+    }
 }
 
 /* Malaking options sa loob */
 select option {
-    font-size: 1.15rem;
+    font-size: 1rem;
 }
 
 /* Ayusin ang table */
@@ -244,7 +280,7 @@ select option {
    TOAST + GLOBAL MODALS
 ========================= */
 
-/* Toast container — laging nasa taas-kanan, naka-stack */
+/* Toast container - laging nasa taas-kanan, naka-stack */
 #toastContainer {
     z-index: 9999;
     max-width: 360px;
@@ -273,7 +309,7 @@ select option {
     gap: 0.25rem;
 }
 
-/* Global modals — consistent rounded corners */
+/* Global modals - consistent rounded corners */
 #globalConfirmModal .modal-content,
 #globalPromptModal .modal-content {
     border-radius: 12px;
