@@ -1,4 +1,4 @@
-// =========================
+﻿// =========================
 // SHARED DATA LAYER
 // =========================
 
@@ -217,6 +217,106 @@ function ensureUIContainers() {
         `;
         document.body.appendChild(modal);
     }
+
+    initPageTransitions();
+}
+
+// ==============================================
+// GLOBAL PAGE TRANSITION & MODERN LOADER
+// ==============================================
+
+function showPageLoader(customText) {
+    const bar = document.getElementById("globalTopProgress");
+    const loader = document.getElementById("globalPageLoader");
+    const textEl = loader ? loader.querySelector(".loader-caption") : null;
+    if (textEl && customText) {
+        textEl.textContent = customText;
+    }
+    if (bar) {
+        bar.className = "loading";
+    }
+    if (loader) {
+        loader.classList.add("active");
+    }
+}
+
+function hidePageLoader() {
+    const bar = document.getElementById("globalTopProgress");
+    const loader = document.getElementById("globalPageLoader");
+    if (bar) {
+        bar.className = "done";
+        setTimeout(function() { 
+            if (bar && bar.className === "done") bar.className = ""; 
+        }, 450);
+    }
+    if (loader) {
+        loader.classList.remove("active");
+    }
+}
+
+let pageTransitionsInitialized = false;
+
+function initPageTransitions() {
+    if (!document.getElementById("globalTopProgress")) {
+        const bar = document.createElement("div");
+        bar.id = "globalTopProgress";
+        document.body.appendChild(bar);
+    }
+    if (!document.getElementById("globalPageLoader")) {
+        const loader = document.createElement("div");
+        loader.id = "globalPageLoader";
+        loader.innerHTML = '<div class="loader-spinner-box"><div class="loader-ring"></div><div class="loader-icon">&#128722;</div></div><p class="loader-caption">Loading...</p>';
+        document.body.appendChild(loader);
+    }
+
+    // Itago agad ang loader sa current page
+    hidePageLoader();
+
+    if (pageTransitionsInitialized) return;
+    pageTransitionsInitialized = true;
+
+    // Mag-animate papasok kapag nag-click ng internal links
+    document.addEventListener("click", function(e) {
+        const link = e.target.closest("a");
+        if (!link) return;
+
+        const href = link.getAttribute("href");
+        if (!href) return;
+
+        // Skip non-page navigation
+        if (
+            href.startsWith("#") ||
+            href.startsWith("javascript:") ||
+            href.startsWith("mailto:") ||
+            href.startsWith("tel:") ||
+            link.getAttribute("target") === "_blank" ||
+            link.hasAttribute("download") ||
+            link.getAttribute("data-bs-toggle") ||
+            link.classList.contains("no-transition") ||
+            e.ctrlKey || e.metaKey || e.shiftKey
+        ) {
+            return;
+        }
+
+        const currentUrl = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        const targetClean = (href.split("#")[0].split("?")[0] || "").toLowerCase();
+        
+        if (targetClean === currentUrl || targetClean === "") {
+            return;
+        }
+
+        // Simulan ang loading animation bago lumipat ng page
+        e.preventDefault();
+        showPageLoader("Loading...");
+        setTimeout(function() {
+            window.location.href = href;
+        }, 150);
+    });
+
+    // Support para sa browser Back/Forward (bfcache)
+    window.addEventListener("pageshow", function() {
+        hidePageLoader();
+    });
 }
 
 if (document.readyState === "loading") {

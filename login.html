@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -150,7 +150,7 @@
 
             if (data.success) {
                 localStorage.setItem("loggedInUser", JSON.stringify(data.user));
-                showToast("Login successful! Welcome, " + data.user.name + "!", "success");
+                showToast("Login successful! Welcome, " + data.user.name + "!", "success");`r`n                if (typeof showPageLoader === "function") { showPageLoader("Entering dashboard..."); }
                 
                 setTimeout(function() {
                     if (role === "admin") {
