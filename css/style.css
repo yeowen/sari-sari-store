@@ -1,0 +1,312 @@
+/* =========================
+   GENERAL
+========================= */
+
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+    color: #212529;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar {
+    padding: 12px 0;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn-success {
+    border-radius: 6px;
+}
+
+
+/* =========================
+   HERO (Index page)
+========================= */
+
+.hero {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: white;
+    padding: 60px 20px;
+    border-radius: 0 0 20px 20px;
+}
+
+.hero h1 {
+    font-weight: bold;
+}
+
+
+/* =========================
+   PAGE HEADER (Iba pang pages)
+========================= */
+
+.page-header {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: white;
+    padding: 40px 20px;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 30px;
+}
+
+.page-header h1,
+.page-header h2 {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.page-header p {
+    margin-bottom: 0;
+    opacity: 0.9;
+}
+
+
+/* =========================
+   PRODUCT CARD
+========================= */
+
+.product-card {
+    transition: 0.2s;
+    border: none;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(25, 135, 84, 0.15) !important;
+}
+
+.product-image {
+    height: 180px;
+    object-fit: contain;
+    padding: 15px;
+}
+
+.price {
+    color: #198754;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.stock {
+    font-size: 14px;
+}
+
+
+/* =========================
+   LOGIN & REGISTER
+========================= */
+
+.login-container,
+.register-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    padding: 20px;
+}
+
+.login-card,
+.register-card {
+    width: 100%;
+    border: none;
+}
+
+.login-card {
+    max-width: 400px;
+}
+
+.register-card {
+    max-width: 450px;
+}
+
+
+/* =========================
+   CART
+========================= */
+
+.cart-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.summary-card {
+    background-color: white;
+    border-radius: 10px;
+    border-left: 4px solid #198754;
+}
+
+
+/* =========================
+   CHECKOUT
+========================= */
+
+.checkout-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+
+/* =========================
+   ORDER CARDS
+========================= */
+
+.order-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 4px solid #198754;
+    transition: 0.2s;
+}
+
+.order-card:hover {
+    box-shadow: 0 8px 20px rgba(25, 135, 84, 0.15) !important;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    margin-top: 50px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+    .hero {
+        padding: 40px 15px;
+    }
+
+    .page-header {
+        padding: 30px 15px;
+    }
+
+    .product-image {
+        height: 150px;
+    }
+
+}
+
+/* =========================
+   DROPDOWNS & INPUTS (SAKTONG LAKI)
+========================= */
+
+/* Ibinalik sa 1.15rem para kapareho lang ng normal text pero madaling basahin */
+select, 
+select.form-select, 
+select.form-control, 
+.form-select, 
+.form-select-sm, 
+.status-select,
+input.form-control,
+input[type="date"],
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"] {
+    font-size: 1.15rem !important; 
+    padding: 0.6rem 1rem !important; 
+    height: auto !important; 
+    border-radius: 0.4rem !important;
+    /* Wala nang fixed width, awtomatikong lalapad */
+}
+
+/* Malaking options sa loob */
+select option {
+    font-size: 1.15rem;
+}
+
+/* Ayusin ang table */
+.table td, .table th {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+/* =========================
+   TOAST + GLOBAL MODALS
+========================= */
+
+/* Toast container — laging nasa taas-kanan, naka-stack */
+#toastContainer {
+    z-index: 9999;
+    max-width: 360px;
+    width: 100%;
+    pointer-events: none;
+}
+
+#toastContainer .toast {
+    min-width: 280px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#toastContainer .toast.show {
+    opacity: 1;
+}
+
+#toastContainer .toast-body {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Global modals — consistent rounded corners */
+#globalConfirmModal .modal-content,
+#globalPromptModal .modal-content {
+    border-radius: 12px;
+    border: none;
+    overflow: hidden;
+}
+
+#globalConfirmModal .modal-header,
+#globalPromptModal .modal-header {
+    border-bottom: none;
+}
+
+#globalConfirmModal .modal-body,
+#globalPromptModal .modal-body {
+    font-size: 1.05rem;
+    padding: 1.25rem 1.5rem;
+}
+
+#globalConfirmModal .modal-footer,
+#globalPromptModal .modal-footer {
+    border-top: none;
+    padding: 0.75rem 1.5rem 1.25rem;
+}
+
+/* Responsive: full-width toast sa mobile */
+@media (max-width: 576px) {
+    #toastContainer {
+        max-width: calc(100% - 1rem);
+        padding: 0.5rem !important;
+    }
+
+    #toastContainer .toast {
+        min-width: 0;
+        width: 100%;
+    }
+}
