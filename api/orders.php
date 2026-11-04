@@ -5,12 +5,14 @@ require_once 'db.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $sql = "SELECT * FROM orders ORDER BY id DESC";
+    // Kukunin ang mga orders mula sa pinakauna para sa malinis at sequential na Order # (#1, #2, #3, ...)
+    $sql = "SELECT * FROM orders ORDER BY id ASC";
     $result = $conn->query($sql);
     $orders = [];
+    $orderNumber = 1;
 
     while($row = $result->fetch_assoc()) {
-        $order_id = $row['id'];
+        $order_id = (int)$row['id'];
         
         $itemSql = "SELECT product_name as name, price, qty FROM order_items WHERE order_id = $order_id";
         $itemResult = $conn->query($itemSql);
@@ -21,7 +23,10 @@ if ($method === 'GET') {
             $items[] = $item;
         }
         
-        $row['id'] = (int)$row['id'];
+        $row['db_id'] = $order_id;
+        $row['order_number'] = $orderNumber++; // Malinis na numero: 1, 2, 3, 4, 5...
+        $row['display_id'] = $row['order_number'];
+        $row['id'] = $order_id; // Database primary key para sa update/delete
         $row['total'] = (float)$row['total'];
         $row['items'] = $items;
         $row['date'] = $row['created_at'];
@@ -38,6 +43,9 @@ if ($method === 'GET') {
 
         $orders[] = $row;
     }
+
+    // Pinakabagong order ang unang makikita sa listahan
+    $orders = array_reverse($orders);
     jsonResponse($orders);
 
 } elseif ($method === 'PUT') {

@@ -37,6 +37,9 @@ if ($method === 'POST') {
             $conn->query($stockSql);
         }
 
+        // 3. I-clear ang active cart ng customer dahil naging ganap na order na
+        $conn->query("DELETE FROM active_carts WHERE user_email = '$user_email'");
+
         jsonResponse(["success" => true, "message" => "Order placed successfully!", "order_id" => $order_id]);
     } else {
         jsonResponse(["success" => false, "message" => "Error: " . $conn->error]);

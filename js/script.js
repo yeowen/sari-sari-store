@@ -21,9 +21,51 @@ function getCart() {
     return cart ? JSON.parse(cart) : [];
 }
 
+// Live Cart Sync to DB para sa Staff Real-Time Monitoring
+let cartSyncDebounce = null;
+function syncCartToDB(cart) {
+    if (cartSyncDebounce) clearTimeout(cartSyncDebounce);
+    cartSyncDebounce = setTimeout(async function() {
+        try {
+            const user = getCurrentUser();
+            let email = user.email;
+            let name = user.name || user.fullName || "Customer";
+
+            if (!email) {
+                let guestToken = localStorage.getItem("guestCartToken");
+                if (!guestToken) {
+                    guestToken = "guest_" + Math.random().toString(36).substring(2, 8) + "@local";
+                    localStorage.setItem("guestCartToken", guestToken);
+                }
+                email = guestToken;
+                name = "Guest Customer";
+            }
+
+            const currentCart = Array.isArray(cart) ? cart : getCart();
+            const total = currentCart.reduce(function(sum, item) {
+                return sum + ((parseFloat(item.price) || 0) * (parseInt(item.qty) || 0));
+            }, 0);
+
+            await fetch("api/cart.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_email: email,
+                    customer_name: name,
+                    items: currentCart,
+                    total: total
+                })
+            });
+        } catch (err) {
+            console.error("Cart sync to DB error:", err);
+        }
+    }, 200);
+}
+
 function saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCartCount();
+    syncCartToDB(cart);
 }
 
 function updateCartCount() {
@@ -389,8 +431,10 @@ if (orderForm) {
             const data = await response.json();
 
             if (data.success) {
-                localStorage.removeItem("cart"); 
-                showToast("Order #" + data.order_id + " placed successfully!", "success");
+                localStorage.removeItem("cart");
+                updateCartCount();
+                syncCartToDB([]);
+                showToast("Order placed successfully!", "success");
                 setTimeout(function() { window.location.href = "orders.html"; }, 1200);
             } else {
                 showToast(data.message, "danger");
@@ -575,6 +619,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     renderProducts();
     attachCategoryFilter();
     updateCartCount();
+    if (getCart().length > 0) {
+        syncCartToDB(getCart());
+    }
     updateNotifCount();
     renderNotifications();
 

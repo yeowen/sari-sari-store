@@ -120,7 +120,7 @@
             card.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-1">Order #${order.id}</h5>
+                        <h5 class="mb-1">Order #${order.order_number || order.display_id || order.id}</h5>
                         <small class="text-muted">Placed on ${formatDisplayDate(order.date)}</small>
                     </div>
                     <span class="badge ${statusColor}">${order.status}</span>
@@ -136,7 +136,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <strong class="text-success">₱${order.total.toFixed(2)}</strong>
-                        ${order.status === "Pending" ? `<button class="btn btn-outline-danger btn-sm cancel-order-btn" data-id="${order.id}">✕ Cancel</button>` : ""}
+                        ${order.status === "Pending" ? `<button class="btn btn-outline-danger btn-sm cancel-order-btn" data-id="${order.id}" data-display="${order.order_number || order.display_id || order.id}">✕ Cancel</button>` : ""}
                     </div>
                 </div>
             `;
@@ -146,9 +146,10 @@
         ordersList.querySelectorAll(".cancel-order-btn").forEach(function(btn) {
             btn.addEventListener("click", function() {
                 const orderId = parseInt(btn.getAttribute("data-id"));
+                const displayNum = btn.getAttribute("data-display") || orderId;
 
                 showConfirm(
-                    "Are you sure you want to cancel Order #" + orderId + "?",
+                    "Are you sure you want to cancel Order #" + displayNum + "?",
                     async function() {
                         try {
                             const response = await fetch('api/orders.php', {
@@ -159,7 +160,7 @@
                             const data = await response.json();
 
                             if (data.success) {
-                                showToast("Order #" + orderId + " cancelled successfully.", "success");
+                                showToast("Order #" + displayNum + " cancelled successfully.", "success");
                                 await getOrdersFromDB(); // I-refresh galing DB
                             } else {
                                 showToast(data.message, "danger");

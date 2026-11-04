@@ -29,7 +29,7 @@ $conn->set_charset('utf8mb4');
 
 date_default_timezone_set('Asia/Manila');
 
-// Auto-seed default accounts at products kung bago/empty ang database
+// Auto-seed default accounts, products, at active_carts table kung wala pa
 function seedDefaultData($conn) {
     // 1. Users
     $checkU = $conn->query("SELECT id FROM users LIMIT 1");
@@ -49,6 +49,16 @@ function seedDefaultData($conn) {
             ('Safeguard Soap', 'personal', 25.00, 15, ''),
             ('Bear Brand Milk', 'beverages', 15.00, 25, '')");
     }
+
+    // 3. Active Carts (Real-time live cart tracking for Staff)
+    $conn->query("CREATE TABLE IF NOT EXISTS active_carts (
+      user_email VARCHAR(254) NOT NULL,
+      customer_name VARCHAR(150) NOT NULL DEFAULT 'Guest',
+      items LONGTEXT NOT NULL,
+      total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (user_email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 }
 seedDefaultData($conn);
 

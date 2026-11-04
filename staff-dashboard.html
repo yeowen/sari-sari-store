@@ -26,7 +26,7 @@
 <section class="page-header text-center">
     <div class="container">
         <h1>👨‍💼 Staff Dashboard</h1>
-        <p>Process incoming orders, manage inventory, and confirm customer pickups.</p>
+        <p>Monitor live customer shopping carts, process incoming orders, and confirm pickups.</p>
     </div>
 </section>
 
@@ -90,6 +90,33 @@
         </div>
     </div>
 
+    <!-- REAL-TIME CUSTOMER LIVE CARTS (SHOPPING BASKETS IN PROGRESS) -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                <span>🛒</span> Customer Live Carts (Real-Time Add-to-Cart Activity)
+            </h5>
+            <span class="badge bg-light text-primary fw-bold px-3 py-2" id="liveCartBadge">0 Active</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Customer</th>
+                            <th>Items Currently in Cart</th>
+                            <th>Estimated Total</th>
+                            <th>Last Activity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liveCartsTable">
+                        <tr><td colspan="4" class="text-center text-muted py-4">No customers currently adding items to cart.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- INCOMING ORDERS TABLE -->
     <div class="card shadow-sm mb-4 border-0">
         <div class="card-header bg-white py-3">
@@ -103,6 +130,7 @@
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Items</th>
+                            <th>Pickup Schedule</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Update Status</th>
@@ -219,9 +247,10 @@
 
         ready.forEach(function(o) {
             const items = o.items.map(function(i) { return i.name + " x" + i.qty; }).join(", ");
+            const displayNum = o.order_number || o.display_id || o.id;
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td><strong>#${o.id}</strong></td>
+                <td><strong class="text-success">#${displayNum}</strong></td>
                 <td>${o.customer_name || "Guest"}</td>
                 <td><small>${items}</small></td>
                 <td><small>${o.pickup_date || "-"}<br>${o.pickup_time || "-"}</small></td>
@@ -244,9 +273,10 @@
                 
                 pickupCurrentOrderId = o.id;
                 pickupCurrentTotal = parseFloat(o.total) || 0;
+                const displayNum = o.order_number || o.display_id || o.id;
                 
                 document.getElementById("pickupOrderId").value = o.id;
-                document.getElementById("pickupOrderDisplayId").textContent = o.id;
+                document.getElementById("pickupOrderDisplayId").textContent = displayNum;
                 document.getElementById("pickupCustomer").textContent = (o.customer_name || "Guest") + (o.contact_number ? " (" + o.contact_number + ")" : "");
                 document.getElementById("pickupTotal").value = "₱" + pickupCurrentTotal.toFixed(2);
                 
@@ -262,6 +292,56 @@
                 }
             });
         });
+    }
+
+    // REAL-TIME CUSTOMER LIVE CARTS FETCH & RENDER
+    async function renderLiveCarts() {
+        const tbody = document.getElementById("liveCartsTable");
+        const badge = document.getElementById("liveCartBadge");
+        if (!tbody) return;
+
+        try {
+            const res = await fetch('api/cart.php');
+            const carts = await res.json();
+            
+            if (badge) badge.textContent = (carts ? carts.length : 0) + " Active";
+            tbody.innerHTML = "";
+
+            if (!carts || carts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No customers are currently adding items to cart.</td></tr>';
+                return;
+            }
+
+            carts.forEach(function(c) {
+                const itemsText = (c.items || []).map(function(it) {
+                    return it.name + " x" + it.qty;
+                }).join(", ");
+
+                let timeText = "Just now";
+                if (c.updated_at) {
+                    const diff = Math.floor((new Date().getTime() - new Date(c.updated_at).getTime()) / 1000);
+                    if (diff > 60) timeText = Math.floor(diff / 60) + "m ago";
+                    else if (diff > 0) timeText = diff + "s ago";
+                }
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>
+                        <strong class="text-dark">${c.customer_name || 'Guest'}</strong><br>
+                        <small class="text-muted">${c.user_email || '-'}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border me-1">${(c.items || []).length} items</span>
+                        <small class="text-secondary">${itemsText}</small>
+                    </td>
+                    <td><strong class="text-success">₱${(c.total || 0).toFixed(2)}</strong></td>
+                    <td><span class="badge bg-success-subtle text-success">${timeText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (e) {
+            console.error("Live carts fetch error", e);
+        }
     }
 
     document.addEventListener("DOMContentLoaded", async function() {
@@ -287,6 +367,7 @@
         renderStaffOrders();
         renderReadyOrders();
         renderStaffStock();
+        renderLiveCarts();
 
         const cashInput = document.getElementById("pickupCashReceived");
         const changeEl = document.getElementById("pickupChange");
@@ -358,12 +439,13 @@
                     renderStaffOrders();
                     renderReadyOrders();
                     renderStaffStock();
-                    showToast("Payment recorded! Order #" + pickupCurrentOrderId + " is now Completed.", "success");
+                    renderLiveCarts();
+                    showToast("Payment recorded! Order #" + document.getElementById("pickupOrderDisplayId").textContent + " is now Completed.", "success");
                 }
             });
         }
 
-        // Auto-sync every 15s so Staff sees customer orders in real time
+        // Auto-sync every 8s: updates live carts, incoming orders, and inventory
         setInterval(async function() {
             try {
                 await getOrdersFromDB();
@@ -371,10 +453,11 @@
                 renderStaffOrders();
                 renderReadyOrders();
                 renderStaffStock();
+                renderLiveCarts();
             } catch (err) {
                 console.error("Auto-sync error", err);
             }
-        }, 15000);
+        }, 8000);
     });
 </script>
 

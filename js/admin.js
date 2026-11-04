@@ -633,7 +633,7 @@ function renderAdminOrders() {
 
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>#${order.id}</td>
+            <td><strong class="text-success">#${order.order_number || order.display_id || order.id}</strong></td>
             <td>${formatDisplayDate(order.date)}</td>
             <td>${order.customer_name || "Guest"}</td>
             <td>₱${order.total.toFixed(2)}</td>
@@ -927,7 +927,7 @@ function renderStaffOrders() {
 
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>#${order.id}</td>
+            <td><strong class="text-success">#${order.order_number || order.display_id || order.id}</strong></td>
             <td>${order.customer_name || "Guest"}</td>
             <td><small>${itemsList}</small></td>
             <td><small>${order.pickup_date || "-"}<br>${order.pickup_time || "-"}</small></td>
