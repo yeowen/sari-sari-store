@@ -50,6 +50,16 @@ function seedDefaultData($conn) {
             ('Bear Brand Milk', 'beverages', 15.00, 25, '')");
     }
 
+    // Ensure payment and cancel columns exist in orders table
+    $colCheck = $conn->query("SHOW COLUMNS FROM orders LIKE 'amount_paid'");
+    if ($colCheck && $colCheck->num_rows === 0) {
+        $conn->query("ALTER TABLE orders ADD COLUMN amount_paid DECIMAL(12,2) NULL, ADD COLUMN change_amount DECIMAL(12,2) NULL, ADD COLUMN payment_method VARCHAR(50) NULL");
+    }
+    $colCancel = $conn->query("SHOW COLUMNS FROM orders LIKE 'cancel_reason'");
+    if ($colCancel && $colCancel->num_rows === 0) {
+        $conn->query("ALTER TABLE orders ADD COLUMN cancel_reason VARCHAR(255) NULL");
+    }
+
     // 3. Active Carts (Real-time live cart tracking for Staff)
     $conn->query("CREATE TABLE IF NOT EXISTS active_carts (
       user_email VARCHAR(254) NOT NULL,

@@ -77,11 +77,29 @@ const ALLOWED_TRANSITIONS = {
     "Cancelled": []
 };
 
-async function updateOrderStatus(index, newStatus, cancelReason, paymentData = null) {
+async function updateOrderStatus(orderIdentifier, newStatus, cancelReason, paymentData = null) {
     const orders = getOrders();
-    const oldStatus = orders[index].status;
+    let order = null;
+    let index = -1;
 
-    if (oldStatus === newStatus) return;
+    // Hanapin kung may tumutugmang ID o Array Index
+    const foundById = orders.findIndex(o => o.id == orderIdentifier || o.db_id == orderIdentifier);
+    if (foundById !== -1) {
+        index = foundById;
+        order = orders[foundById];
+    } else if (typeof orderIdentifier === "number" && orderIdentifier >= 0 && orderIdentifier < orders.length) {
+        index = orderIdentifier;
+        order = orders[orderIdentifier];
+    }
+
+    if (!order) {
+        console.error("Order not found with identifier:", orderIdentifier);
+        showToast("Order not found.", "danger");
+        return false;
+    }
+
+    const oldStatus = order.status;
+    if (oldStatus === newStatus && !paymentData) return true;
 
     const allowed = ALLOWED_TRANSITIONS[oldStatus] || [];
     if (!allowed.includes(newStatus)) {
@@ -89,87 +107,69 @@ async function updateOrderStatus(index, newStatus, cancelReason, paymentData = n
         return false;
     }
 
-    // --- I-SAVE ANG BAYAD ---
+    // I-save ang bayad kung may paymentData
     if (paymentData) {
-        orders[index].payment = {
-            amountPaid: paymentData.amount_paid,
-            change: paymentData.change_amount,
-            method: "cash"
+        order.payment = {
+            amountPaid: parseFloat(paymentData.amount_paid) || 0,
+            change: parseFloat(paymentData.change_amount) || 0,
+            method: paymentData.payment_method || "cash"
         };
     }
 
-    // --- STOCK DEDUCTION (COMPLETED) ---
-    if (newStatus === "Completed" && oldStatus !== "Completed") {
-        try {
-            const products = getProducts();
-            for (const item of orders[index].items) {
-                const product = products.find(p => p.name === item.name);
-                if (product) {
-                    const newStock = Math.max(0, product.stock - item.qty);
-                    await fetch('api/admin-products.php', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...product, stock: newStock })
-                    });
-                }
-            }
-            await getProductsFromDB(); 
-        } catch (err) {
-            console.error("Failed to deduct stock", err);
-        }
-        orders[index].stockDeducted = true;
-    }
-
-    // --- RESTORE STOCK (CANCELLED) ---
-    if (newStatus === "Cancelled" && orders[index].stockDeducted === true) {
-        restoreStock(orders[index].items);
-        orders[index].stockDeducted = false;
-    }
-
     if (newStatus === "Cancelled" && cancelReason) {
-        orders[index].cancelReason = cancelReason;
-        orders[index].cancelledAt = nowISO();
+        order.cancelReason = cancelReason;
+        order.cancelledAt = nowISO();
     }
 
-    orders[index].status = newStatus;
+    order.status = newStatus;
 
-    let notifMsg = "Your Order #" + orders[index].id + " is now " + newStatus + ".";
+    const displayNum = order.order_number || order.display_id || order.id;
+    let notifMsg = "Your Order #" + displayNum + " is now " + newStatus + ".";
     if (newStatus === "Cancelled" && cancelReason) {
-        notifMsg = "Your Order #" + orders[index].id + " was cancelled. Reason: " + cancelReason;
+        notifMsg = "Your Order #" + displayNum + " was cancelled. Reason: " + cancelReason;
     }
 
-    addNotification(orders[index].userEmail, notifMsg, "customer");
+    addNotification(order.userEmail, notifMsg, "customer");
 
     if (newStatus === "Cancelled" && !cancelReason) {
-        addNotification("", "Order #" + orders[index].id + " was cancelled by customer.", "staff");
-        addNotification("", "Order #" + orders[index].id + " was cancelled by customer.", "admin");
+        addNotification("", "Order #" + displayNum + " was cancelled by customer.", "staff");
+        addNotification("", "Order #" + displayNum + " was cancelled by customer.", "admin");
     }
 
-    // --- SAVE TO DATABASE ---
+    // Direct, super-fast update sa database
     try {
+        const payload = {
+            id: order.id,
+            status: newStatus,
+            cancel_reason: cancelReason || null
+        };
+        if (order.payment) {
+            payload.amount_paid = order.payment.amountPaid;
+            payload.change_amount = order.payment.change;
+            payload.payment_method = order.payment.method;
+        }
+
         const response = await fetch('api/orders.php', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id: orders[index].id,
-                status: newStatus,
-                cancel_reason: cancelReason || null,
-                amount_paid: orders[index].payment ? orders[index].payment.amountPaid : null,
-                change_amount: orders[index].payment ? orders[index].payment.change : null,
-                payment_method: orders[index].payment ? orders[index].payment.method : null
-            })
+            body: JSON.stringify(payload)
         });
         
-        if (!response.ok) throw new Error("Failed to update database");
+        const resData = await response.json();
+        if (!resData.success) {
+            showToast(resData.message || "Failed to update order", "danger");
+            return false;
+        }
         
         saveOrders(orders);
         
         if (newStatus === "Completed" || newStatus === "Cancelled") {
-            renderCharts();
+            if (typeof renderCharts === "function") renderCharts();
         }
         
         return true;
     } catch (error) {
+        console.error("Error updating order:", error);
         showToast("Error updating order in database.", "danger");
         return false;
     }

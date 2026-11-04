@@ -423,24 +423,28 @@
                 btnText.textContent = "Recording...";
                 spinner.classList.remove("d-none");
 
-                const success = await updateOrderStatus(pickupCurrentOrderId, "Completed", null, { 
-                    amount_paid: cash, 
-                    change_amount: Math.max(0, cash - pickupCurrentTotal)
-                });
+                try {
+                    const success = await updateOrderStatus(pickupCurrentOrderId, "Completed", null, { 
+                        amount_paid: cash, 
+                        change_amount: Math.max(0, cash - pickupCurrentTotal)
+                    });
 
-                confirmBtn.disabled = false;
-                btnText.textContent = "Confirm Payment & Complete";
-                spinner.classList.add("d-none");
-                
-                if (success) {
-                    if (pickupModalInstance) pickupModalInstance.hide();
-                    await getOrdersFromDB();
-                    await getProductsFromDB();
-                    renderStaffOrders();
-                    renderReadyOrders();
-                    renderStaffStock();
-                    renderLiveCarts();
-                    showToast("Payment recorded! Order #" + document.getElementById("pickupOrderDisplayId").textContent + " is now Completed.", "success");
+                    if (success) {
+                        if (pickupModalInstance) pickupModalInstance.hide();
+                        showToast("Payment recorded! Order #" + document.getElementById("pickupOrderDisplayId").textContent + " is now Completed.", "success");
+                        await getOrdersFromDB();
+                        renderStaffOrders();
+                        renderReadyOrders();
+                        renderStaffStock();
+                        renderLiveCarts();
+                    }
+                } catch (err) {
+                    console.error("Confirm pickup error:", err);
+                    showToast("Error processing payment. Please try again.", "danger");
+                } finally {
+                    confirmBtn.disabled = false;
+                    btnText.textContent = "Confirm Payment & Complete";
+                    spinner.classList.add("d-none");
                 }
             });
         }
