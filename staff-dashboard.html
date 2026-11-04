@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Staff Dashboard - Sari-Sari Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
@@ -10,7 +10,7 @@
 <body>
 
 <!-- NAVBAR (DYNAMIC) -->
-<nav class="navbar navbar-expand-lg bg-white shadow-sm">
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand text-success" href="index.html">🛒 Sari-Sari Store</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
@@ -25,12 +25,12 @@
 <!-- PAGE HEADER -->
 <section class="page-header text-center">
     <div class="container">
-        <h1>👷 Staff Dashboard</h1>
-        <p>Process incoming orders and confirm pickups.</p>
+        <h1>👨‍💼 Staff Dashboard</h1>
+        <p>Process incoming orders, manage inventory, and confirm customer pickups.</p>
     </div>
 </section>
 
-<div class="container">
+<div class="container pb-5">
 
     <div id="adminBackWrapper" class="mb-3" style="display: none;">
         <a href="admin-dashboard.html" class="btn btn-outline-success btn-sm">
@@ -40,46 +40,46 @@
 
     <!-- STATS -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Pending</h6>
-                <h2 class="text-warning" id="pendingCount">0</h2>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm text-center p-3 border-0">
+                <small class="text-muted">Total Orders</small>
+                <h3 class="fw-bold mt-1 mb-0" id="staffTotalOrders">0</h3>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Preparing</h6>
-                <h2 class="text-primary" id="preparingCount">0</h2>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm text-center p-3 border-0">
+                <small class="text-muted">Pending Orders</small>
+                <h3 class="fw-bold text-warning mt-1 mb-0" id="staffPendingOrders">0</h3>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Ready for Pickup</h6>
-                <h2 class="text-success" id="readyCount">0</h2>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm text-center p-3 border-0">
+                <small class="text-muted">Ready for Pickup</small>
+                <h3 class="fw-bold text-success mt-1 mb-0" id="staffReadyOrders">0</h3>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Completed</h6>
-                <h2 class="text-secondary" id="completedCount">0</h2>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm text-center p-3 border-0">
+                <small class="text-muted">Completed Today</small>
+                <h3 class="fw-bold text-primary mt-1 mb-0" id="staffCompletedOrders">0</h3>
             </div>
         </div>
     </div>
 
-    <!-- READY FOR PICKUP -->
-    <div class="card shadow-sm mb-4 border-success">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">✅ Ready for Pickup — Confirm Payment</h5>
+    <!-- READY FOR PICKUP TABLE -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-success text-white py-3">
+            <h5 class="mb-0 fw-bold">✅ Ready for Pickup — Confirm & Record Payment</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Items</th>
-                            <th>Pickup</th>
+                            <th>Pickup Schedule</th>
                             <th>Total</th>
                             <th>Action</th>
                         </tr>
@@ -90,21 +90,22 @@
         </div>
     </div>
 
-    <!-- INCOMING ORDERS -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="mb-3">📋 Incoming Orders</h5>
+    <!-- INCOMING ORDERS TABLE -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">📋 Incoming Orders Management</h5>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Items</th>
-                            <th>Pickup</th>
                             <th>Total</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th>Update Status</th>
                         </tr>
                     </thead>
                     <tbody id="staffOrdersTable"></tbody>
@@ -113,17 +114,19 @@
         </div>
     </div>
 
-    <!-- STOCK MONITORING -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="mb-3">📦 Stock Monitoring <small class="text-muted">(editable)</small></h5>
+    <!-- STOCK MONITORING TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">📦 Real-Time Stock Monitoring</h5>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
                             <th>Product</th>
                             <th>Category</th>
-                            <th>Stock</th>
+                            <th>Current Stock</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -135,36 +138,59 @@
 
 </div>
 
-<!-- CONFIRM PICKUP MODAL -->
-<div class="modal fade" id="pickupModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">✅ Confirm Pickup & Record Cash Payment</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- CONFIRM PICKUP & PAYMENT MODAL -->
+<div class="modal fade" id="pickupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-success text-white py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <span>✅</span> Confirm Pickup & Record Cash Payment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="pickupOrderIndex" value="-1">
-                <div class="alert alert-info">
-                    <strong>Order #<span id="pickupOrderId"></span></strong><br>
-                    Customer: <span id="pickupCustomer"></span>
+            <div class="modal-body p-4">
+                <input type="hidden" id="pickupOrderId" value="">
+                
+                <div class="alert alert-success-subtle border border-success-subtle rounded-3 p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="fs-5 text-success">Order #<span id="pickupOrderDisplayId"></span></strong>
+                        <span class="badge bg-success">Ready for Pickup</span>
+                    </div>
+                    <div class="text-muted small mt-1">Customer: <strong id="pickupCustomer" class="text-dark"></strong></div>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Total Amount Due</label>
-                    <input type="text" class="form-control form-control-lg fw-bold text-success" id="pickupTotal" readonly>
+                    <label class="form-label small fw-semibold text-muted">Total Amount Due</label>
+                    <input type="text" class="form-control form-control-lg fw-bold text-success bg-light" id="pickupTotal" readonly style="font-size: 1.4rem;">
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Cash Received <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control form-control-lg" id="pickupCashReceived" placeholder="0.00" min="0" step="0.01">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0">Cash Received <span class="text-danger">*</span></label>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary py-0 px-2" id="quickExactBtn">Exact</button>
+                            <button type="button" class="btn btn-outline-secondary py-0 px-2" id="quick500Btn">₱500</button>
+                            <button type="button" class="btn btn-outline-secondary py-0 px-2" id="quick1000Btn">₱1000</button>
+                        </div>
+                    </div>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white fw-bold">₱</span>
+                        <input type="number" class="form-control fw-bold" id="pickupCashReceived" placeholder="0.00" min="0" step="any" autofocus>
+                    </div>
+                    <div id="cashValidationMsg" class="form-text mt-1"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Change</label>
-                    <input type="text" class="form-control form-control-lg fw-bold" id="pickupChange" readonly>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold text-muted">Change (Sukli)</label>
+                    <input type="text" class="form-control form-control-lg fw-bold bg-light" id="pickupChange" readonly placeholder="₱0.00">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" id="confirmPickupBtn">✅ Confirm Payment & Complete</button>
+            <div class="modal-footer bg-light px-4 py-3">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success fw-semibold px-4" id="confirmPickupBtn" disabled>
+                    <span id="confirmPickupBtnText">Confirm Payment & Complete</span>
+                    <span id="confirmPickupSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -175,24 +201,23 @@
 <script src="js/script.js"></script>
 <script src="js/admin.js"></script>
 <script>
-    // ITO ANG BAGONG SCRIPT PARA SA STAFF DASHBOARD
     let pickupModalInstance = null;
+    let pickupCurrentTotal = 0;
+    let pickupCurrentOrderId = null;
 
     function renderReadyOrders() {
         const tbody = document.getElementById("readyOrdersTable");
         if (!tbody) return;
         const orders = getOrders();
-        const ready = orders.map(function(o, i) { return { order: o, index: i }; })
-            .filter(function(x) { return x.order.status === "Ready for Pickup"; });
+        const ready = orders.filter(function(o) { return o.status === "Ready for Pickup"; });
 
         tbody.innerHTML = "";
         if (ready.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No orders ready for pickup.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No orders currently ready for pickup.</td></tr>';
             return;
         }
 
-        ready.forEach(function(x) {
-            const o = x.order;
+        ready.forEach(function(o) {
             const items = o.items.map(function(i) { return i.name + " x" + i.qty; }).join(", ");
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -202,8 +227,8 @@
                 <td><small>${o.pickup_date || "-"}<br>${o.pickup_time || "-"}</small></td>
                 <td><strong class="text-success">₱${o.total.toFixed(2)}</strong></td>
                 <td>
-                    <button class="btn btn-success btn-sm confirm-pickup-btn" data-index="${x.index}">
-                        💵 Confirm Pickup
+                    <button class="btn btn-success btn-sm confirm-pickup-btn fw-semibold" data-order-id="${o.id}">
+                        ✅ Confirm Pickup
                     </button>
                 </td>
             `;
@@ -212,17 +237,29 @@
 
         tbody.querySelectorAll(".confirm-pickup-btn").forEach(function(btn) {
             btn.addEventListener("click", function() {
-                const index = parseInt(btn.getAttribute("data-index"));
+                const orderId = parseInt(btn.getAttribute("data-order-id"));
                 const orders = getOrders();
-                const o = orders[index];
+                const o = orders.find(x => x.id === orderId);
+                if (!o) return;
                 
-                document.getElementById("pickupOrderIndex").value = index;
-                document.getElementById("pickupOrderId").textContent = o.id;
-                document.getElementById("pickupCustomer").textContent = o.customer_name || "Guest";
-                document.getElementById("pickupTotal").value = "₱" + o.total.toFixed(2);
-                document.getElementById("pickupCashReceived").value = "";
+                pickupCurrentOrderId = o.id;
+                pickupCurrentTotal = parseFloat(o.total) || 0;
+                
+                document.getElementById("pickupOrderId").value = o.id;
+                document.getElementById("pickupOrderDisplayId").textContent = o.id;
+                document.getElementById("pickupCustomer").textContent = (o.customer_name || "Guest") + (o.contact_number ? " (" + o.contact_number + ")" : "");
+                document.getElementById("pickupTotal").value = "₱" + pickupCurrentTotal.toFixed(2);
+                
+                const cashInput = document.getElementById("pickupCashReceived");
+                cashInput.value = "";
                 document.getElementById("pickupChange").value = "";
-                pickupModalInstance.show();
+                document.getElementById("cashValidationMsg").textContent = "";
+                document.getElementById("confirmPickupBtn").disabled = true;
+                
+                if (pickupModalInstance) {
+                    pickupModalInstance.show();
+                    setTimeout(() => cashInput.focus(), 400);
+                }
             });
         });
     }
@@ -252,41 +289,92 @@
         renderStaffStock();
 
         const cashInput = document.getElementById("pickupCashReceived");
-        if (cashInput) {
-            cashInput.addEventListener("input", function() {
-                const total = parseFloat(document.getElementById("pickupTotal").value.replace("₱", "")) || 0;
-                const cash = parseFloat(cashInput.value) || 0;
-                const change = cash - total;
-                document.getElementById("pickupChange").value = change >= 0 ? "₱" + change.toFixed(2) : "⚠️ Insufficient";
-            });
+        const changeEl = document.getElementById("pickupChange");
+        const msgEl = document.getElementById("cashValidationMsg");
+        const confirmBtn = document.getElementById("confirmPickupBtn");
+
+        function updateChangeCalc() {
+            const cash = parseFloat(cashInput.value) || 0;
+
+            if (cashInput.value.trim() === "" || cash === 0) {
+                changeEl.value = "";
+                msgEl.textContent = "";
+                confirmBtn.disabled = true;
+                return;
+            }
+
+            const change = cash - pickupCurrentTotal;
+            if (change >= 0) {
+                changeEl.value = "₱" + change.toFixed(2);
+                changeEl.className = "form-control form-control-lg fw-bold bg-light text-success";
+                msgEl.innerHTML = '<span class="text-success fw-semibold">✓ Sufficient Cash</span>';
+                confirmBtn.disabled = false;
+            } else {
+                changeEl.value = "⚠️ Insufficient";
+                changeEl.className = "form-control form-control-lg fw-bold bg-light text-danger";
+                msgEl.innerHTML = '<span class="text-danger fw-semibold">Kulang pa ng ₱' + Math.abs(change).toFixed(2) + '</span>';
+                confirmBtn.disabled = true;
+            }
         }
 
-        const confirmBtn = document.getElementById("confirmPickupBtn");
+        if (cashInput) cashInput.addEventListener("input", updateChangeCalc);
+        
+        const quickExact = document.getElementById("quickExactBtn");
+        const quick500 = document.getElementById("quick500Btn");
+        const quick1000 = document.getElementById("quick1000Btn");
+        
+        if (quickExact) quickExact.addEventListener("click", () => { cashInput.value = pickupCurrentTotal.toFixed(2); updateChangeCalc(); });
+        if (quick500) quick500.addEventListener("click", () => { cashInput.value = "500.00"; updateChangeCalc(); });
+        if (quick1000) quick1000.addEventListener("click", () => { cashInput.value = "1000.00"; updateChangeCalc(); });
+
         if (confirmBtn) {
             confirmBtn.addEventListener("click", async function() {
-                const index = parseInt(document.getElementById("pickupOrderIndex").value);
-                const total = parseFloat(document.getElementById("pickupTotal").value.replace("₱", "")) || 0;
-                const cash = parseFloat(document.getElementById("pickupCashReceived").value) || 0;
+                const cash = parseFloat(cashInput.value) || 0;
 
-                if (cash < total) {
-                    showToast("Insufficient cash. Total: ₱" + total.toFixed(2), "danger");
+                if (cash < pickupCurrentTotal) {
+                    showToast("Insufficient cash. Total due is ₱" + pickupCurrentTotal.toFixed(2), "danger");
                     return;
                 }
 
-                const success = await updateOrderStatus(index, "Completed", null, { 
+                const spinner = document.getElementById("confirmPickupSpinner");
+                const btnText = document.getElementById("confirmPickupBtnText");
+                confirmBtn.disabled = true;
+                btnText.textContent = "Recording...";
+                spinner.classList.remove("d-none");
+
+                const success = await updateOrderStatus(pickupCurrentOrderId, "Completed", null, { 
                     amount_paid: cash, 
-                    change_amount: cash - total 
+                    change_amount: Math.max(0, cash - pickupCurrentTotal)
                 });
+
+                confirmBtn.disabled = false;
+                btnText.textContent = "Confirm Payment & Complete";
+                spinner.classList.add("d-none");
                 
                 if (success) {
-                    pickupModalInstance.hide();
+                    if (pickupModalInstance) pickupModalInstance.hide();
+                    await getOrdersFromDB();
+                    await getProductsFromDB();
                     renderStaffOrders();
                     renderReadyOrders();
                     renderStaffStock();
-                    showToast("Payment recorded! Order is now Completed.", "success");
+                    showToast("Payment recorded! Order #" + pickupCurrentOrderId + " is now Completed.", "success");
                 }
             });
         }
+
+        // Auto-sync every 15s so Staff sees customer orders in real time
+        setInterval(async function() {
+            try {
+                await getOrdersFromDB();
+                await getProductsFromDB();
+                renderStaffOrders();
+                renderReadyOrders();
+                renderStaffStock();
+            } catch (err) {
+                console.error("Auto-sync error", err);
+            }
+        }, 15000);
     });
 </script>
 

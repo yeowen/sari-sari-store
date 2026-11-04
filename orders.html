@@ -186,10 +186,20 @@
 
     document.addEventListener("DOMContentLoaded", async function() {
         if (typeof renderNavbar === "function") renderNavbar();
+    document.addEventListener("DOMContentLoaded", async function() {
+        if (typeof renderNavbar === "function") renderNavbar();
         
         // KUNIN MUNA SA DATABASE BAGO MAG-RENDER
         await getOrdersFromDB();
         renderOrders();
+
+        // Real-time sync every 15s para updated ang order status ng customer
+        setInterval(async function() {
+            try {
+                await getOrdersFromDB();
+                renderOrders();
+            } catch (e) {}
+        }, 15000);
     });
 </script>
 

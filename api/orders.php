@@ -30,7 +30,7 @@ if ($method === 'GET') {
             $row['payment'] = [
                 "amountPaid" => (float)$row['amount_paid'],
                 "change" => (float)$row['change_amount'],
-                "method" => $row['payment_method']
+                "method" => $row['payment_method'] ?: 'cash'
             ];
         } else {
             $row['payment'] = null;
@@ -42,14 +42,43 @@ if ($method === 'GET') {
 
 } elseif ($method === 'PUT') {
     $data = json_decode(file_get_contents("php://input"), true);
-    $id = (int)$data['id'];
-    $status = $conn->real_escape_string($data['status']);
-    $cancel_reason = isset($data['cancel_reason']) ? "'" . $conn->real_escape_string($data['cancel_reason']) . "'" : "NULL";
+    $id = (int)($data['id'] ?? 0);
+    $status = $conn->real_escape_string($data['status'] ?? 'Pending');
+    $cancel_reason = isset($data['cancel_reason']) && $data['cancel_reason'] !== null ? "'" . $conn->real_escape_string($data['cancel_reason']) . "'" : "NULL";
 
-    $sql = "UPDATE orders SET status='$status', cancel_reason=$cancel_reason WHERE id=$id";
+    $setParts = ["status='$status'", "cancel_reason=$cancel_reason"];
+
+    if (isset($data['amount_paid']) && $data['amount_paid'] !== null && $data['amount_paid'] !== '') {
+        $amount_paid = (float)$data['amount_paid'];
+        $setParts[] = "amount_paid=$amount_paid";
+    }
+    if (isset($data['change_amount']) && $data['change_amount'] !== null && $data['change_amount'] !== '') {
+        $change_amount = (float)$data['change_amount'];
+        $setParts[] = "change_amount=$change_amount";
+    }
+    if (isset($data['payment_method']) && $data['payment_method'] !== null && $data['payment_method'] !== '') {
+        $payment_method = $conn->real_escape_string($data['payment_method']);
+        $setParts[] = "payment_method='$payment_method'";
+    }
+
+    $setClause = implode(", ", $setParts);
+    $sql = "UPDATE orders SET $setClause WHERE id=$id";
     
     if ($conn->query($sql) === TRUE) {
-        jsonResponse(["success" => true, "message" => "Order status updated"]);
+        // I-restore ang stock kung kinansela ang order
+        if ($status === 'Cancelled') {
+            $itemSql = "SELECT product_name, qty FROM order_items WHERE order_id = $id";
+            $itemRes = $conn->query($itemSql);
+            if ($itemRes) {
+                while ($it = $itemRes->fetch_assoc()) {
+                    $pName = $conn->real_escape_string($it['product_name']);
+                    $pQty = (int)$it['qty'];
+                    $conn->query("UPDATE products SET stock = stock + $pQty WHERE name = '$pName'");
+                }
+            }
+        }
+
+        jsonResponse(["success" => true, "message" => "Order updated successfully"]);
     } else {
         jsonResponse(["success" => false, "message" => "Error: " . $conn->error]);
     }

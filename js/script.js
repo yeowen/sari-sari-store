@@ -565,11 +565,26 @@ function renderNavbar() {
 
 // ---------- INITIALIZE ----------
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
     renderNavbar();
+    try {
+        await getProductsFromDB();
+    } catch (e) {
+        console.error("Products DB fetch error:", e);
+    }
     renderProducts();
     attachCategoryFilter();
     updateCartCount();
     updateNotifCount();
     renderNotifications();
+
+    // Auto-sync products from database every 15s para laging updated ang Customer sa paninda
+    if (document.getElementById("productList")) {
+        setInterval(async function() {
+            try {
+                await getProductsFromDB();
+                renderProducts();
+            } catch (e) {}
+        }, 15000);
+    }
 });

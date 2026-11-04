@@ -1,4 +1,4 @@
-// =========================
+﻿// =========================
 // SARI-SARI STORE — ADMIN & STAFF SCRIPT
 // =========================
 
@@ -294,7 +294,7 @@ function renderAdminProducts() {
 
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${p.id}</td>
+            <td><strong class="text-success">#${realIndex + 1}</strong></td>
             <td><img src="${imgSrc}" style="width: 60px; height: 45px; object-fit: cover;" class="rounded border"></td>
             <td>${p.name}</td>
             <td><span class="badge bg-secondary">${categoryLabel}</span></td>
@@ -1075,7 +1075,20 @@ document.addEventListener("DOMContentLoaded", async function() {
         const orderSearch = document.getElementById("orderSearch");
         const orderStatusFilter = document.getElementById("orderStatusFilter");
         if (orderSearch) orderSearch.addEventListener("input", function() { paginationState.orders = 1; renderAdminOrders(); });
-        if (orderStatusFilter) orderStatusFilter.addEventListener("change", function() { paginationState.orders = 1; renderAdminOrders(); });
+                if (orderStatusFilter) orderStatusFilter.addEventListener("change", function() { paginationState.orders = 1; renderAdminOrders(); });
+
+        // Auto-sync every 15s para laging updated ang Admin dashboard sa mga bagong order ng Customer at Staff
+        setInterval(async function() {
+            try {
+                await getProductsFromDB();
+                await getOrdersFromDB();
+                renderAdminProducts();
+                renderSalesSummary();
+                renderAdminOrders();
+                renderCompletedTransactions();
+                renderCharts();
+            } catch (err) {}
+        }, 15000);
     }
 
     // STAFF PAGE
